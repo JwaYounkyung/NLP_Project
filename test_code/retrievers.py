@@ -11,6 +11,8 @@ from tqdm.auto import tqdm
 import pandas as pd
 import pinecone
 from tqdm.auto import tqdm  # progress bar
+import warnings
+warnings.filterwarnings("ignore")
 
 
 squad = load_dataset('squad_v2', split='train', streaming=True)
@@ -21,7 +23,7 @@ for row in tqdm(squad):
     ))
 
 # MNR loss can't have duplicate data(context, question)
-batch_size = 24
+batch_size = 8
 loader = datasets.NoDuplicatesDataLoader(
     train, batch_size=batch_size
 )
@@ -39,13 +41,14 @@ loss = losses.MultipleNegativesRankingLoss(model)
 epochs = 1
 warmup_steps = int(len(loader) * epochs * 0.1)
 
-model.fit(
-    train_objectives=[(loader, loss)],
-    epochs=epochs,
-    warmup_steps=warmup_steps,
-    output_path='mpnet-mnr-squad2',
-    show_progress_bar=True
-)
+# model.fit(
+#     train_objectives=[(loader, loss)],
+#     epochs=epochs,
+#     warmup_steps=warmup_steps,
+#     output_path='mpnet-mnr-squad2',
+#     show_progress_bar=True
+# )
+model = SentenceTransformer('multi-qa-mpnet-base-cos-v1')
 
 squad_dev = load_dataset('squad_v2', split='validation', streaming=True)
 
@@ -58,16 +61,18 @@ for row in tqdm(squad_dev):
     }, ignore_index=True)
 
 
+# duplicate contexts should not assigned different IDs
 no_dupe = squad_df.drop_duplicates(
     subset='context',
     keep='first'
 )
-# also drop question column
+# drop question column
 no_dupe = no_dupe.drop(columns=['question'])
-# and give each context a slightly unique ID
+# give each context a slightly unique ID
 no_dupe['id'] = no_dupe['id'] + 'con'
 squad_df = squad_df.merge(no_dupe, how='inner', on='context')
 
+# make query and context id dictionary
 ir_queries = {
     row['id_x']: row['question'] for i, row in squad_df.iterrows()
 }
@@ -108,7 +113,7 @@ squad_dev = squad_dev.map(lambda x: {
     'encoding': model.encode(x['context']).tolist()
 }, batched=True, batch_size=4)
 
-API_KEY = '<>'
+API_KEY = '54c68dfa-f01b-4423-91f9-5c7938a30cfc'
 
 pinecone.init(api_key=API_KEY, environment='us-west1-gcp')
 # check if index already exists, if not we create it
