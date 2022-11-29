@@ -6,6 +6,7 @@ import re
 import codecs
 from transformers import AutoModelForQuestionAnswering, AutoTokenizer, pipeline
 import transformers
+from preprocess_qa import context_preprocess
 
 if __name__ == "__main__":
     input_file = sys.argv[1]#'./data/set1/a1.txt'
@@ -19,8 +20,11 @@ if __name__ == "__main__":
     transformers.utils.logging.disable_progress_bar()
     nlp = pipeline('question-answering', model=model_name, tokenizer=model_name)
     
-    with open(input_file, 'r') as f:
-        text = f.read()
+    # Open and Preprocess the given context
+    # with open(input_file, 'r') as f:
+    #     text = f.read()    
+    preprocessed_text = context_preprocess(input_file)
+    text = ''.join(preprocessed_text)
 
     with open(question_file, 'r') as f:
         count = 0
