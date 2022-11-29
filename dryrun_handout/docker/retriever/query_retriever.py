@@ -20,8 +20,10 @@ assert 'squad-index' in pinecone.list_indexes(), "Index does not exist"
 # import pinecone index
 index = pinecone.Index('squad-index')
 
-query = "who added 8 more goals in 2006?"
+query = "Who ordered the killing of Xio Dong?"#,Xiao Yi" #Southern Qi
 query_encoded = model.encode([query]).tolist()
-retriever_result = index.query(query_encoded, top_k=2, include_metadata=True) # id, metadata, score
+retriever_result = index.query(query_encoded, top_k=3, include_metadata=True) # id, metadata, score
 
 print(retriever_result['matches'][0]['metadata']['text'])
+print(retriever_result['matches'][1]['metadata']['text'])
+print(retriever_result['matches'][2]['metadata']['text'])
