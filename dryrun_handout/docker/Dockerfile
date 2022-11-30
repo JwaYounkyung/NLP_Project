@@ -21,11 +21,22 @@ RUN pip3 install transformers
 RUN pip3 install sentencepiece
 RUN pip3 install --upgrade protobuf==3.20.0
 
+RUN pip3 install crosslingual-coreference
+RUN pip3 install Pillow==9.0.0
+RUN pip3 install spacy
+RUN python3 -m spacy download en_core_web_sm
+
+RUN pip3 install unidecode
+RUN pip3 install autocorrect
+RUN pip3 install nltk
 
 # Add the files into container, under QA folder, modify this based on your need
 RUN mkdir /QA
 ADD ask /QA
 ADD answer /QA
+ADD to_pronoun.py /QA
+ADD paraphrase.py /QA
+ADD preprocess_qg.py /QA
 
 # Change the permissions of programs
 CMD ["chmod 777 /QA/*"]
