@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
         # prnonX : list
         for sent_num in range(len(pronounX)//5):
-            i = random.randint(0,len(pronounX))
+            i = random.randrange(len(pronounX))
             temp = paraphrase_model.get_response(pronounX[i])
             selected.extend(temp)
             selected.append(pronounX[i])
