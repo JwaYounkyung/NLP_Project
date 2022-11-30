@@ -29,10 +29,13 @@ def context_preprocess(input_file):
     # text = spelling_correction(text)
     
     # 6. Split into Sentences
-    # sentences = split_into_sentences(text)
+    # text = split_into_sentences(text)
     
     # 7. remove the non-english words
-    # sentences = remove_non_english(sentences)
+    # text = remove_non_english(text)
+    
+    # 8. Delete the titles of the document
+    # text = delete_titles(text)
 
     output = text.split('\n')
     return output
@@ -106,4 +109,10 @@ def split_into_sentences(text):
 
     return sentences
 
+def delete_titles(text):
+    new_sent = []
+    for sent in text.split('\n'):
+        if len(sent) > 0 and sent[-1] == '.':
+            new_sent.append(sent)
     
+    return '\n'.join(new_sent)

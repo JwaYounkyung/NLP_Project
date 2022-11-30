@@ -2,17 +2,14 @@
 # -*- coding:utf8 -*-
 
 import sys
-# import spacy
-import codecs
 from transformers import ProphetNetTokenizer, ProphetNetForConditionalGeneration#, ProphetNetConfig
-import transformers
 from to_pronoun import change_to_noun
 from preprocess_qg import context_preprocess, split_into_sentences
 from paraphrase import paraphrase
 import random
 
 if __name__ == "__main__":
-    print("Let's start!")
+    # print("Let's start!")
     pronoun_model = change_to_noun()
     paraphrase_model = paraphrase()
     
@@ -22,54 +19,36 @@ if __name__ == "__main__":
     
     input_file = sys.argv[1] #/host/Users/data/set1/a1.txt
     # input_file = "host/Users/data/set1/a1.txt" #/host/Users/data/set1/a1.txt
-    # N = 3 #3
     N = int(sys.argv[2]) #3
     
 
-    # with open(input_file, 'r') as f:
-    #     text = f.read()
-
-    # cut_lines = text.split("\n")
     # Open and Preprocess the given context
     # ********************************************************
-    preprocessed_text = context_preprocess(input_file) #리스트이다, 한 원소는 문단 하나이다.
+    preprocessed_text = context_preprocess(input_file) 
 
-    # sample = preprocessed_text[0] # 세희 코드 연습
-    # z=pronoun_model.input_txt(sample)
 
     num_lines = len(preprocessed_text)
-    # num_target = num_lines//N
 
 
-    # 리트리버 output : 우리가 원하는 만큼의 문단을 찾는다. (일단 보류)
     for j in range(N):
-        pronounX = [] #대명사가 없어진 문단의 리스트
+        pronounX = [] 
         for mundan_num in range(3):
             i = random.randrange(len(preprocessed_text))
             mundan=preprocessed_text[i]
-            pronounXM = pronoun_model.input_txt(mundan) #string : 문단
-            pronounXMS=split_into_sentences(pronounXM) #list : 문단이 문장단위로 쪼개져있음
-            pronounX.extend(pronounXMS) #list : list로 구성됨.
+            pronounXM = pronoun_model.input_txt(mundan) 
+            pronounXMS=split_into_sentences(pronounXM) 
+            pronounX.extend(pronounXMS) 
 
         selected = []
 
-        # prnonX : list, 선별된 문장으로 구성됨.
+        # prnonX : list
         for sent_num in range(len(pronounX)//5):
             i = random.randint(0,len(pronounX))
             temp = paraphrase_model.get_response(pronounX[i])
             selected.extend(temp)
             selected.append(pronounX[i])
-        print(selected)
-        QG_input = " ".join(selected) #string이 되었습니다.
-
-        # for i in range(N):
-        #     sen_list = cut_lines[i*num_target:num_target*(i+1)]
-        #     sep_cont = ' '.join(sen_list)
-        #     QG_input.append(sep_cont)
-
-
-        # 대명사 치우기
-        # pronoun_model.input_txt()
+        # print(selected)
+        QG_input = " ".join(selected)
 
 
         inputs = tokenizer([QG_input], return_tensors='pt')

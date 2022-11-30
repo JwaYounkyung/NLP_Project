@@ -1,6 +1,5 @@
 #!/usr/bin/python3 -W ignore::DeprecationWarning
 # -*- coding:utf8 -*-
-import sys
 from transformers import pipeline
 import transformers
 from preprocess_qa import context_preprocess
@@ -9,19 +8,24 @@ from sentence_transformers import SentenceTransformer
 import pinecone
 
 args = {
-    'index_name': 'a1'.lower(), # index name cannot have "_"
+    'index_name': 'Maharashtra'.lower(), # index name cannot have "_"
     'API_KEY': '54c68dfa-f01b-4423-91f9-5c7938a30cfc',
-    'top_k': 1,
+    'data_dic': './documents/indian_states/Maharashtra.txt',  #./data/set1/a1.txt'
+    'top_k': 5,
 }
 
 if __name__ == "__main__":
-    input_file =  sys.argv[1] # './data/set1/a1.txt'
-    question_file = sys.argv[2] # './test_questions.txt'
+    input_file = args['data_dic']
+    question_file = './new_test_questions.txt'
 
     # model_name = "deepset/roberta-base-squad2"
     model_name = "distilbert-base-uncased-distilled-squad"
     # model_name = "bert-large-uncased-whole-word-masking-finetuned-squad"
     # model_name = "ktrapeznikov/albert-xlarge-v2-squad-v2"
+
+    model_name = "deepset/bert-large-uncased-whole-word-masking-squad2"
+    # model_name = "bert-large-uncased-whole-word-masking-finetuned-squad"
+    print('model_name: ', model_name)
 
     transformers.utils.logging.disable_progress_bar()
     nlp = pipeline('question-answering', model=model_name, tokenizer=model_name)
@@ -59,6 +63,6 @@ if __name__ == "__main__":
             res = nlp(QA_input)
 
             if res['answer'] == None:
-                print('Yes')
+                print('')
             else:
                 print(res['answer'])

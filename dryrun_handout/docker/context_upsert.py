@@ -15,7 +15,7 @@ def context_upsert(args, preprocessed_text):
     pinecone.init(api_key=args['API_KEY'], environment='us-west1-gcp')
 
     if args['index_name'] in pinecone.list_indexes():
-        return print('Index already exists')
+        return # print('Index already exists')
     
     if pinecone.list_indexes() != []:
         pinecone.delete_index(pinecone.list_indexes()[0])
@@ -56,4 +56,4 @@ def context_upsert(args, preprocessed_text):
         if i_end > len(upserts): i_end = len(upserts)
         index.upsert(vectors=upserts[i:i_end])
 
-    print('Pinecone upsert completed')
+    # print('Pinecone upsert completed')
