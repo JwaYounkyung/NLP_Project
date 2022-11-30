@@ -7,10 +7,20 @@ import codecs
 from transformers import AutoModelForQuestionAnswering, AutoTokenizer, pipeline
 import transformers
 from preprocess_qa import context_preprocess
+from retriever.context_upsert import context_upsert
+from sentence_transformers import SentenceTransformer
+import pinecone
+
+args = {
+    'index_name': 'Handynasty'.lower(), # index name cannot have "_"
+    'API_KEY': '54c68dfa-f01b-4423-91f9-5c7938a30cfc',
+    'data_dic': 'dryrun_handout/documents/chinese_dynasties/Han_dynasty.txt',
+    'top_k': 1,
+}
 
 if __name__ == "__main__":
-    input_file = sys.argv[1]#'./data/set1/a1.txt'
-    question_file = sys.argv[2]#'./test_questions.txt'
+    input_file = './data/set1/a1.txt' #sys.argv[1]
+    question_file = './test_questions.txt' #sys.argv[2]
 
     model_name = "deepset/roberta-base-squad2"
     # model_name = "distilbert-base-uncased-distilled-squad"
@@ -19,12 +29,21 @@ if __name__ == "__main__":
 
     transformers.utils.logging.disable_progress_bar()
     nlp = pipeline('question-answering', model=model_name, tokenizer=model_name)
-    
-    # Open and Preprocess the given context
-    # with open(input_file, 'r') as f:
-    #     text = f.read()    
+      
     preprocessed_text = context_preprocess(input_file)
-    text = ''.join(preprocessed_text)
+
+    # upsert context
+    context_upsert(args, preprocessed_text)
+
+    # retrieve context
+    model = SentenceTransformer('multi-qa-mpnet-base-cos-v1')
+    pinecone.init(api_key=args['API_KEY'], environment='us-west1-gcp')
+   
+    # check if index already exists, if not assert
+    assert args['index_name'] in pinecone.list_indexes(), "Index does not exist"
+    # import pinecone index
+    index = pinecone.Index(args['index_name'])
+
 
     with open(question_file, 'r') as f:
         count = 0
@@ -32,6 +51,16 @@ if __name__ == "__main__":
             count += 1
 
             question = line.strip()
+            question_encoded = model.encode([question]).tolist()
+            retriever_result = index.query(question_encoded, top_k=args['top_k'], include_metadata=True)
+
+            context = []
+            for i in range(args['top_k']):
+                context.append(retriever_result['matches'][i]['metadata']['text'])
+            text = ''.join(context)
+
+            # print('Question: ', question, '\n\n', 'Context: ', text)
+
             QA_input = {"question": question, "context": text}
             res = nlp(QA_input)
 
