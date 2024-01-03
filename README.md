@@ -4,6 +4,9 @@ This repository contains the implementation of a Question Answering and Question
 ## Overview
 We developed a fast Question Answering (QA) system and an answerable Question Generation (QG) system for Wikipedia articles.
 
+## Paper
+[Final Report](https://github.com/JwaYounkyung/NLP_Project/blob/master/NLP_FinalReport.pdf)
+
 ## QA system
 <img src="https://github.com/JwaYounkyung/NLP_Project/assets/50140321/eae625ac-bd92-4e9f-b4d4-33991e8a78a2"  width="310"/>
 
